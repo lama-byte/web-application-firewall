@@ -1,0 +1,22 @@
+# XSS attempt
+(<script>)
+
+# SQL Injection
+(union\s+select)    
+
+# Path Traversal
+(\.\./)             
+
+# Command Injection
+(;|&&|\|\|)         
+
+# Backdoor 
+(?i)base64_decode\s*\(  
+
+# Buffer Overflow 
+(?s).{5000,}            
+
+ 
+# DB Delay
+(?i)\b(?:waitfor\s+delay|pg_sleep|dbms_lock\.sleep)\s*\(  
+

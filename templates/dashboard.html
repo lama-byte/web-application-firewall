@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAF Dashboard</title>
+
+    <style>
+        body {
+            margin: 20px 40px;
+            padding: 20px;
+        }
+        h1 {
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        h3 {
+            text-transform: capitalize;
+            font-weight:bold;
+            font-style: italic;
+            font-size: 22px;
+        }
+
+        #logsContainer{
+           text-align: left ;
+           margin: 0 auto;
+           display: block;
+        }
+        table {
+            margin: 0 auto;
+        }
+	table td,th {
+            width: 130px;
+            padding: 5px;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <h1>✩₊˚.⋆ WAF Dashboard ⋆⁺₊✧</h1>
+
+    <hr>
+    <h3>Traffic Summary</h3>
+    <div>
+        <p id="blockedCount" >Blocked: 0</p>
+            <div id="blockedBar" style="height:20px; background:rgb(154, 65, 65); width:0%;"></div>
+
+        <p id="allowedCount">Allowed: 0</p>
+            <div id="allowedBar" style="height:20px; background:rgb(80, 137, 80); width:0%;"></div>
+    
+        <p id="flaggedCount">Flagged: 0</p>
+            <div id="flaggedBar" style="height:20px; background:rgb(194, 142, 58); width:0%;"></div>
+        <br>
+    </div>
+    
+    <h3>Request Logs</h3>
+    <div id="logsContainer">
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>IP</th>
+                <th>Path</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody id="logTable">
+
+
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5"><b>Total Number of Request</b></td>
+                <td id="TotalNum"><b>0</b></td>
+            </tr>
+        </tfoot>
+    </table>
+    <p style="text-align: center;">✦•┈⋯⋯⋯⋅⋯⋅⋯⋯⋅⋯⋅⋯⋯⋅⋯⋅⋯⋅⋯⋅⋯⋯⋅⋯⋅⋯⋯⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋯⋅⋯⋅⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅⋯⋅┈•✦</p>
+    </div>
+<script>
+    async function loadData() {
+      const res = await fetch('/data');
+      const data = await res.json();
+
+      document.getElementById('blockedCount').textContent = "Blocked: " + data.blocked;
+      document.getElementById('allowedCount').textContent = "Allowed: " + data.allowed;
+      document.getElementById('flaggedCount').textContent = "Flagged: " + data.flagged;
+
+      // Update visual bars
+      const total = data.blocked + data.allowed + data.flagged;
+      const blockedPercent = total ? (data.blocked / total) * 100 : 0;
+      const allowedPercent = total ? (data.allowed / total) * 100 : 0;
+      const flaggedPercent = total ? (data.flagged / total) * 100 : 0;
+      document.getElementById('blockedBar').style.width = blockedPercent + "%";
+      document.getElementById('allowedBar').style.width = allowedPercent + "%";
+      document.getElementById('flaggedBar').style.width = flaggedPercent + "%";
+      document.getElementById('TotalNum').textContent = total; 
+
+      // Table rows
+      const tbody = document.getElementById('logTable');
+      tbody.innerHTML = '';
+      let color;
+      data.logs.forEach(log => {
+        // const color = log.status === 'BLOCKED' ? 'red' : 'green';
+        if (log.status === 'BLOCKED')
+            color = 'rgb(154, 65, 65)';
+        else if (log.status === 'ALLOWED')
+            color = 'rgb(80, 137, 80)';
+        else 
+            color = 'rgb(194, 142, 58)';
+        tbody.innerHTML += `<tr>
+          <td style="color:${color}">${log.status}</td>
+          <td>${log.ip}</td>
+          <td>${log.path}</td>
+          <td>${log.date}</td>
+          <td>${log.time}</td>
+          <td>${log.score}</td>
+        </tr>`;
+      });
+    }
+    loadData();
+    setInterval(loadData, 5000);
+</script>
+</body>
+</html>
